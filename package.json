@@ -1,0 +1,23 @@
+{
+  "name": "wilty-stats",
+  "version": "0.1.0",
+  "description": "This project started with some self reflection and a simple observation. I often unwind with an episode of the british panel comedy show [Would I Lie To You?](https://en.wikipedia.org/wiki/List_of_Would_I_Lie_to_You%3F_episodes) In one particualr episode, it seemed like the female guests had their suggestions ignored by the team leaders. It got me thinking that it might be a great dataset to dig a little further into.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eddiesholl/wilty-stats.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eddiesholl/wilty-stats/issues"
+  },
+  "homepage": "https://github.com/eddiesholl/wilty-stats#readme",
+  "dependencies": {
+    "ramda": "^0.23.0",
+    "x-ray": "^2.3.1"
+  }
+}
