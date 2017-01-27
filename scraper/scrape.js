@@ -4,6 +4,8 @@ var x = Xray();
 const fs = require('fs');
 const R = require('ramda');
 
+const merge = require('./merge');
+
 const scrapePromise = new Promise((resolve, reject) => {
     x('https://en.wikipedia.org/wiki/List_of_Would_I_Lie_to_You%3F_episodes', 'table tr', [{
         title: 'td:first-child',
@@ -30,7 +32,7 @@ const readPromise = new Promise((resolve, reject) => {
             resolve({ episodes: [] });
         } else {
             try {
-                resolve(JSON.parse(data).episodes);
+                resolve(JSON.parse(data));
             } catch (e) {
                 console.warn('Could not parse episodes.json: ' + e);
                 resolve({ episodes: [] });
@@ -39,19 +41,19 @@ const readPromise = new Promise((resolve, reject) => {
     })
 });
 
-const cleanArray = R.reject(R.isNil);
 const hasValue = v => {
     return !R.isNil(v);
 };
 
-const mergeEpisodes = (scraped, existing) => {
-    const existingLookup = R.reduce((acc, ep) => {
-        acc[ep.title] = ep;
-        return acc;
-    }, {}, cleanArray(existing));
-
-    const merged = scraped.filter(s => {
+const cleanScrapedEpisodes = (rawEpisodes) => {
+    return rawEpisodes.filter(s => {
             return !!s.title;
+        }).filter(s => {
+            if (s.davidsGuestNames.length === 2 && s.leesGuestNames.length === 2) {
+                return true;
+            } else {
+                console.log(`skipping episode ${s.title} because of guest data`);
+            }
         }).map(s => {
             const titleMatch = s.title.match(/^(\d\d)x(\d\d)$/);
             if (titleMatch && titleMatch.length > 2) {
@@ -79,34 +81,25 @@ const mergeEpisodes = (scraped, existing) => {
                 }
             }
         })
-        .filter(hasValue)
-        .map(s => {
-            const e = existingLookup[s.title];
-
-            if (e) {
-                console.log('found existing record for ' + s.title);
-                return R.merge(e, s);
-            } else {
-                console.log('found new episode ' + s.title);
-                return s;
-            }
-        }).map(R.dissoc('rounds'));
-
-    return cleanArray(merged);
-}
+        .filter(hasValue);
+};
 
 Promise.all([scrapePromise, readPromise]).then(results => {
         const scraped = results[0];
         const existing = results[1];
 
+        const scrapedEpisodes = cleanScrapedEpisodes(scraped);
+
         console.log('merging results');
-        const merged = mergeEpisodes(scraped, existing.episodes);
+        const guests = merge.mergeGuests(scrapedEpisodes, existing.guests || [])
+        const episodes = merge.mergeEpisodes(scrapedEpisodes, existing.episodes, guests);
         const rounds = existing.rounds || [];
 
         //  console.log('writing result ' + JSON.stringify(merged))
         fs.writeFile('episodes.json', JSON.stringify({
-            episodes: merged,
-            rounds
+            episodes,
+            rounds,
+            guests
         }, 0, 2));
     })
     .catch(e => {
