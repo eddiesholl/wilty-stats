@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/eddiesholl/wilty-stats#readme",
   "dependencies": {
+    "json-server": "^0.9.4",
     "ramda": "^0.23.0",
     "x-ray": "^2.3.1"
   }
