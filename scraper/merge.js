@@ -50,6 +50,18 @@ const mergeGuests = (scraped, existingGuests) => {
     return scrapedGuests;
 };
 
+const guestId = (g) => {
+    return strToId(g.name);
+};
+const guestsToGuestIds = (ep) => {
+    const result = Object.assign({}, ep);
+    result.davidsGuest1 = guestId(ep.davidsGuest1);
+    result.davidsGuest2 = guestId(ep.davidsGuest2);
+    result.davidsGuest1 = guestId(ep.leesGuest1);
+    result.leesGuest2 = guestId(ep.leesGuest2);
+
+    return result;
+};
 
 const mergeEpisodes = (scraped, existingEpisodes, guests) => {
     const existingLookup = R.reduce((acc, ep) => {
@@ -68,7 +80,9 @@ const mergeEpisodes = (scraped, existingEpisodes, guests) => {
                 console.log('found new episode ' + s.title);
                 return s;
             }
-        }).map(R.dissoc('rounds'));
+        })
+        .map(R.dissoc('rounds'))
+        .map(guestsToGuestIds);
 
     return cleanArray(merged);
 }
