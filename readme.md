@@ -12,3 +12,6 @@ I'm certain there's no overt ill will within the show, and I'm sure they activel
 
 ## Data sources
 For now, I'm planning on pulling the episode and team lists from the wikipedia page linked above. I haven't found any other fansite resources where individual round results have been compiled, so that side is going ot require some good old fashioned screen time. No complaints here.
+
+## Manual updates
+If you make manual edits to the json data file, the atom plugin 'Pretty JSON' is a reliable way to reformat the file so its layout stays consistent with the scraper script. This helps to avoid whiespace churn in the diffs on this file.
