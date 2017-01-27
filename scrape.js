@@ -48,7 +48,7 @@ const mergeEpisodes = (scraped, existing) => {
     const existingLookup = R.reduce((acc, ep) => {
         acc[ep.title] = ep;
         return acc;
-    }, {}, existing);
+    }, {}, cleanArray(existing));
 
     const merged = scraped.filter(s => {
             return !!s.title;
@@ -75,8 +75,7 @@ const mergeEpisodes = (scraped, existing) => {
                     leesGuest2: {
                         name: s.leesGuestNames[1],
                         url: s.leesGuestLinks[1]
-                    },
-                    rounds: []
+                    }
                 }
             }
         })
@@ -91,8 +90,7 @@ const mergeEpisodes = (scraped, existing) => {
                 console.log('found new episode ' + s.title);
                 return s;
             }
-
-        });
+        }).map(R.dissoc('rounds'));
 
     return cleanArray(merged);
 }
@@ -102,11 +100,16 @@ Promise.all([scrapePromise, readPromise]).then(results => {
         const existing = results[1];
 
         console.log('merging results');
-        const merged = mergeEpisodes(scraped, existing);
+        const merged = mergeEpisodes(scraped, existing.episodes);
+        const rounds = existing.rounds || [];
 
         //  console.log('writing result ' + JSON.stringify(merged))
-        fs.writeFile('episodes.json', JSON.stringify({ episodes: merged }, 0, 2));
+        fs.writeFile('episodes.json', JSON.stringify({
+            episodes: merged,
+            rounds
+        }, 0, 2));
     })
     .catch(e => {
         console.error(e)
+        console.error(e.stack)
     })
