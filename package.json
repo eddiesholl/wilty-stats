@@ -4,7 +4,8 @@
   "description": "This project started with some self reflection and a simple observation. I often unwind with an episode of the british panel comedy show [Would I Lie To You?](https://en.wikipedia.org/wiki/List_of_Would_I_Lie_to_You%3F_episodes) In one particualr episode, it seemed like the female guests had their suggestions ignored by the team leaders. It got me thinking that it might be a great dataset to dig a little further into.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "json": "./node_modules/json-server/bin/index.js episodes.json -w"
   },
   "repository": {
     "type": "git",
