@@ -6,6 +6,7 @@ import Json.Decode as Json exposing(string)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Task
 
+
 main =
   Html.program
   { init = init
@@ -17,35 +18,42 @@ main =
  -- MODEL
 
 
-getMoviePoster : String -> Cmd Msg
-getMoviePoster searchString =
+getEpisodes : Cmd Msg
+getEpisodes =
   let
-    --url = "//localhost:8000/episodes"
-        url =
-      "//www.omdbapi.com/?t=" ++ searchString
+    url = "//localhost:3000/episodes"
   in
-    Http.send FetchResult (Http.get url decodeMovieUrl)
+    Http.send FetchResult (Http.get url decodeEpisodes)
 
-type alias Movie =
-  { title : String
-  , posterUrl : String
+type alias Episodes = List Episode
+
+type alias Episode =
+  { season: String
+  , title : String
+  , episode: String
+  , id: String
   }
-decodeMovieUrl : Json.Decoder Movie
-decodeMovieUrl =
-  decode Movie
-    |> JsonPipeline.required "Title" string
-    |> JsonPipeline.required "Poster" string
+
+decodeEpisodes : Json.Decoder Episodes
+decodeEpisodes = Json.list decodeEpisode
+
+decodeEpisode : Json.Decoder Episode
+decodeEpisode =
+  decode Episode
+    |> JsonPipeline.required "season" string
+    |> JsonPipeline.required "title" string
+    |> JsonPipeline.required "episode" string
+    |> JsonPipeline.required "id" string
 
 type alias Model =
-  { searchString : String
-  , title: String
-  , posterUrl : String
+  {
+  episodes : List Episode
   }
 
 init : (Model, Cmd Msg)
 init =
-  ( Model "Frozen" "" ""
-  , getMoviePoster "Frozen"
+  ( Model []
+  , getEpisodes
   )
 
  -- UPDATE
@@ -53,43 +61,44 @@ init =
 type Msg
   = GetPoster
   | ChangeMovieTitle String
-  | FetchResult (Result Http.Error Movie)
+  | FetchResult (Result Http.Error Episodes)
   | UpdateSearchString String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     ChangeMovieTitle newSearchString ->
-       { model | title = newSearchString } ! []
+       model ! []
     GetPoster ->
-      { model | posterUrl = "waiting.gif"
-      , title = ""
-      } ! [getMoviePoster model.searchString]
-    FetchResult (Ok movie) ->
-      (Model model.searchString movie.title movie.posterUrl, Cmd.none)
+      model ! [getEpisodes]
+    FetchResult (Ok episodes) ->
+      (Model episodes, Cmd.none)
     FetchResult (Err _) ->
       let
         errorMessage = "We couldn’t find that movie 😯"
         errorImage = "oh-no.jpeg"
       in
-        (Model model.searchString errorMessage errorImage, Cmd.none)
+        (model, Cmd.none)
     UpdateSearchString newSearchString ->
-      { model | searchString = newSearchString } ! []
+      model ! []
 
  -- VIEW
+
+--episodeToHtml : Episode -> Html
+episodeToHtml episode =
+  li [] [text episode.id]
 
 view : Model -> Html Msg
 view model =
   div []
     [ input [ placeholder "enter a movie title"
-            , value model.searchString
+            , value "abc"
             , autofocus True
             , onInput UpdateSearchString
             ] []
    , button [ onClick GetPoster ] [ text "Get poster!" ]
-   , br [] []
-   , h1 [] [ text model.title ]
-   , img [ src model.posterUrl ] []
+   , ul []
+      (List.map episodeToHtml model.episodes)
  ]
 
  -- SUBSCRIPTIONS
