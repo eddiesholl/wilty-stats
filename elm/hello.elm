@@ -1,10 +1,7 @@
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Http
 import Json.Decode as Json exposing(string)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
-import Task
 import Navigation exposing (Location)
 
 import Models exposing (Episode, EpisodeId, Episodes, EpisodesModel, initialModel, Route)
@@ -13,6 +10,7 @@ import Routing exposing (parseLocation)
 import Episodes.List
 import Episodes.View
 
+main : Program Never EpisodesModel Msg
 main =
   Navigation.program Msgs.OnLocationChange
   { init = init
