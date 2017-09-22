@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "json": "./node_modules/json-server/bin/index.js episodes.json -w"
+    "json": "./node_modules/json-server/bin/index.js episodes.json -w",
+    "client": "webpack-dev-server --port 3000"
   },
   "repository": {
     "type": "git",
@@ -22,5 +23,16 @@
     "json-server": "^0.9.4",
     "ramda": "^0.23.0",
     "x-ray": "^2.3.1"
+  },
+  "devDependencies": {
+    "ace-css": "^1.1.0",
+    "css-loader": "^0.28.7",
+    "elm-webpack-loader": "^4.3.1",
+    "file-loader": "^0.11.2",
+    "font-awesome": "^4.7.0",
+    "style-loader": "^0.18.2",
+    "url-loader": "^0.5.9",
+    "webpack": "^3.6.0",
+    "webpack-dev-server": "^2.8.2"
   }
 }
