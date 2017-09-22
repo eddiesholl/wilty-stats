@@ -6,6 +6,8 @@ import Json.Decode as Json exposing(string)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Task
 
+import Models exposing (Episode, Episodes, EpisodesModel, initialModel)
+
 
 main =
   Html.program
@@ -15,24 +17,12 @@ main =
   , subscriptions = subscriptions
   }
 
- -- MODEL
-
-
 getEpisodes : Cmd Msg
 getEpisodes =
   let
     url = "//localhost:3000/episodes"
   in
     Http.send FetchResult (Http.get url decodeEpisodes)
-
-type alias Episodes = List Episode
-
-type alias Episode =
-  { season: String
-  , title : String
-  , episode: String
-  , id: String
-  }
 
 decodeEpisodes : Json.Decoder Episodes
 decodeEpisodes = Json.list decodeEpisode
@@ -45,14 +35,9 @@ decodeEpisode =
     |> JsonPipeline.required "episode" string
     |> JsonPipeline.required "id" string
 
-type alias EpisodesModel =
-  {
-  episodes : List Episode
-  }
-
 init : (EpisodesModel, Cmd Msg)
 init =
-  ( EpisodesModel []
+  ( initialModel
   , getEpisodes
   )
 
