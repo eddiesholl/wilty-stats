@@ -23,11 +23,6 @@ episodeToHtml episode =
 view : EpisodesModel -> Html Msg
 view model =
   div []
-    [ input [ placeholder "enter a movie title"
-            , value "abc"
-            , autofocus True
-            , onInput UpdateSearchString
-            ] []
-   , ul []
+    [ ul []
       (List.map episodeToHtml model.episodes)
  ]
