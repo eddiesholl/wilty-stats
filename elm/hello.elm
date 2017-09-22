@@ -45,14 +45,14 @@ decodeEpisode =
     |> JsonPipeline.required "episode" string
     |> JsonPipeline.required "id" string
 
-type alias Model =
+type alias EpisodesModel =
   {
   episodes : List Episode
   }
 
-init : (Model, Cmd Msg)
+init : (EpisodesModel, Cmd Msg)
 init =
-  ( Model []
+  ( EpisodesModel []
   , getEpisodes
   )
 
@@ -64,7 +64,7 @@ type Msg
   | FetchResult (Result Http.Error Episodes)
   | UpdateSearchString String
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> EpisodesModel -> (EpisodesModel, Cmd Msg)
 update msg model =
   case msg of
     ChangeMovieTitle newSearchString ->
@@ -72,7 +72,7 @@ update msg model =
     GetPoster ->
       model ! [getEpisodes]
     FetchResult (Ok episodes) ->
-      (Model episodes, Cmd.none)
+      (EpisodesModel episodes, Cmd.none)
     FetchResult (Err _) ->
       let
         errorMessage = "We couldn’t find that movie 😯"
@@ -88,7 +88,7 @@ update msg model =
 episodeToHtml episode =
   li [] [text episode.id]
 
-view : Model -> Html Msg
+view : EpisodesModel -> Html Msg
 view model =
   div []
     [ input [ placeholder "enter a movie title"
@@ -103,6 +103,6 @@ view model =
 
  -- SUBSCRIPTIONS
 
-subscriptions : Model -> Sub Msg
+subscriptions : EpisodesModel -> Sub Msg
 subscriptions model =
   Sub.none
