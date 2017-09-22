@@ -1,22 +1,24 @@
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Html.Attributes exposing (class, value, href)
 import Http
 import Json.Decode as Json exposing(string)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
-import Task
+import Navigation exposing (Location)
 
+import Models exposing (Episode, EpisodeId, Episodes, EpisodesModel, initialModel, Route)
+import Msgs exposing (Msg(..))
+import Routing exposing (parseLocation)
+import Episodes.List
+import Episodes.View
 
+main : Program Never EpisodesModel Msg
 main =
-  Html.program
+  Navigation.program Msgs.OnLocationChange
   { init = init
   , view = view
   , update = update
   , subscriptions = subscriptions
   }
-
- -- MODEL
-
 
 getEpisodes : Cmd Msg
 getEpisodes =
@@ -24,15 +26,6 @@ getEpisodes =
     url = "//localhost:3000/episodes"
   in
     Http.send FetchResult (Http.get url decodeEpisodes)
-
-type alias Episodes = List Episode
-
-type alias Episode =
-  { season: String
-  , title : String
-  , episode: String
-  , id: String
-  }
 
 decodeEpisodes : Json.Decoder Episodes
 decodeEpisodes = Json.list decodeEpisode
@@ -45,34 +38,23 @@ decodeEpisode =
     |> JsonPipeline.required "episode" string
     |> JsonPipeline.required "id" string
 
-type alias Model =
-  {
-  episodes : List Episode
-  }
-
-init : (Model, Cmd Msg)
-init =
-  ( Model []
-  , getEpisodes
-  )
+init : Location -> (EpisodesModel, Cmd Msg)
+init location =
+  let
+    currentRoute =
+      Routing.parseLocation location
+  in
+    ( initialModel currentRoute
+    , getEpisodes
+    )
 
  -- UPDATE
 
-type Msg
-  = GetPoster
-  | ChangeMovieTitle String
-  | FetchResult (Result Http.Error Episodes)
-  | UpdateSearchString String
-
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> EpisodesModel -> (EpisodesModel, Cmd Msg)
 update msg model =
   case msg of
-    ChangeMovieTitle newSearchString ->
-       model ! []
-    GetPoster ->
-      model ! [getEpisodes]
-    FetchResult (Ok episodes) ->
-      (Model episodes, Cmd.none)
+    FetchResult (Ok newEpisodes) ->
+      ({ model | episodes = newEpisodes}, Cmd.none)
     FetchResult (Err _) ->
       let
         errorMessage = "We couldn’t find that movie 😯"
@@ -80,29 +62,65 @@ update msg model =
       in
         (model, Cmd.none)
     UpdateSearchString newSearchString ->
-      model ! []
+      (model, Cmd.none)
+    OnLocationChange location ->
+      let
+          newRoute =
+              parseLocation location
+      in
+          ( { model | route = newRoute }, Cmd.none )
 
  -- VIEW
+episodeViewPage : EpisodesModel -> EpisodeId -> Html Msg
+episodeViewPage model episodeId =
+  let
+      maybeEpisode =
+          model.episodes
+              |> List.filter (\episode -> episode.id == episodeId)
+              |> List.head
+  in
+      case maybeEpisode of
+          Just episode ->
+              Episodes.View.view episode
 
---episodeToHtml : Episode -> Html
-episodeToHtml episode =
-  li [] [text episode.id]
+          Nothing ->
+              notFoundView
 
-view : Model -> Html Msg
+
+
+notFoundView : Html msg
+notFoundView =
+    div []
+        [ text "Not found"
+        ]
+
+detailView : EpisodesModel -> Html Msg
+detailView model =
+    case model.route of
+        Models.EpisodesRoute ->
+            Episodes.List.view model
+
+        Models.EpisodeRoute id ->
+            episodeViewPage model id
+
+        Models.NotFoundRoute ->
+            notFoundView
+
+headerView model =
+  div []
+    [a
+      [ href "/"
+      ]
+      [text "Home"]
+    ]
+
 view model =
   div []
-    [ input [ placeholder "enter a movie title"
-            , value "abc"
-            , autofocus True
-            , onInput UpdateSearchString
-            ] []
-   , button [ onClick GetPoster ] [ text "Get poster!" ]
-   , ul []
-      (List.map episodeToHtml model.episodes)
- ]
-
+    [ headerView model
+    , detailView model
+    ]
  -- SUBSCRIPTIONS
 
-subscriptions : Model -> Sub Msg
+subscriptions : EpisodesModel -> Sub Msg
 subscriptions model =
   Sub.none

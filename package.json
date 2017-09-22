@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "json": "./node_modules/json-server/bin/index.js episodes.json -w",
-    "client": "webpack-dev-server --port 3000"
+    "client": "webpack-dev-server --port 4000"
   },
   "repository": {
     "type": "git",
