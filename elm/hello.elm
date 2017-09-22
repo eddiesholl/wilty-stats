@@ -1,4 +1,5 @@
 import Html exposing (..)
+import Html.Attributes exposing (class, value, href)
 import Http
 import Json.Decode as Json exposing(string)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
@@ -93,8 +94,8 @@ notFoundView =
         [ text "Not found"
         ]
 
-view : EpisodesModel -> Html Msg
-view model =
+detailView : EpisodesModel -> Html Msg
+detailView model =
     case model.route of
         Models.EpisodesRoute ->
             Episodes.List.view model
@@ -105,6 +106,19 @@ view model =
         Models.NotFoundRoute ->
             notFoundView
 
+headerView model =
+  div []
+    [a
+      [ href "/"
+      ]
+      [text "Home"]
+    ]
+
+view model =
+  div []
+    [ headerView model
+    , detailView model
+    ]
  -- SUBSCRIPTIONS
 
 subscriptions : EpisodesModel -> Sub Msg
