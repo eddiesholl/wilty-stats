@@ -6,10 +6,19 @@ import Html.Events exposing (..)
 
 import Models exposing (Episode, EpisodesModel)
 import Msgs exposing (Msg(..))
+import Routing exposing (episodePath)
 
 episodeToHtml : Episode -> Html Msg
 episodeToHtml episode =
-  li [] [text episode.id]
+  let
+    path =
+        episodePath episode.id
+  in
+    li [] [a
+            [ href path
+            ]
+            [text episode.id]
+          ]
 
 view : EpisodesModel -> Html Msg
 view model =

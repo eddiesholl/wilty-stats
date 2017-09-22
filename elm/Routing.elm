@@ -4,6 +4,14 @@ import Navigation exposing (Location)
 import Models exposing (EpisodeId, Route(..))
 import UrlParser exposing (..)
 
+episodesPath : String
+episodesPath =
+    "#episodes"
+
+
+episodePath : EpisodeId -> String
+episodePath id =
+    "#episodes/" ++ id
 
 matchers : Parser (Route -> a) a
 matchers =
@@ -16,7 +24,7 @@ matchers =
 
 parseLocation : Location -> Route
 parseLocation location =
-    case (parsePath matchers location) of
+    case (parseHash matchers location) of
         Just route ->
             route
 
