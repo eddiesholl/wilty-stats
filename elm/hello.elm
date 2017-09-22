@@ -5,12 +5,16 @@ import Http
 import Json.Decode as Json exposing(string)
 import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Task
+import Navigation exposing (Location)
 
-import Models exposing (Episode, Episodes, EpisodesModel, initialModel)
-
+import Models exposing (Episode, EpisodeId, Episodes, EpisodesModel, initialModel, Route)
+import Msgs exposing (Msg(..))
+import Routing exposing (parseLocation)
+import Episodes.List
+import Episodes.View
 
 main =
-  Html.program
+  Navigation.program Msgs.OnLocationChange
   { init = init
   , view = view
   , update = update
@@ -35,29 +39,23 @@ decodeEpisode =
     |> JsonPipeline.required "episode" string
     |> JsonPipeline.required "id" string
 
-init : (EpisodesModel, Cmd Msg)
-init =
-  ( initialModel
-  , getEpisodes
-  )
+init : Location -> (EpisodesModel, Cmd Msg)
+init location =
+  let
+    currentRoute =
+      Routing.parseLocation location
+  in
+    ( initialModel currentRoute
+    , getEpisodes
+    )
 
  -- UPDATE
-
-type Msg
-  = GetPoster
-  | ChangeMovieTitle String
-  | FetchResult (Result Http.Error Episodes)
-  | UpdateSearchString String
 
 update : Msg -> EpisodesModel -> (EpisodesModel, Cmd Msg)
 update msg model =
   case msg of
-    ChangeMovieTitle newSearchString ->
-       model ! []
-    GetPoster ->
-      model ! [getEpisodes]
-    FetchResult (Ok episodes) ->
-      (EpisodesModel episodes, Cmd.none)
+    FetchResult (Ok newEpisodes) ->
+      ({ model | episodes = newEpisodes}, Cmd.none)
     FetchResult (Err _) ->
       let
         errorMessage = "We couldn’t find that movie 😯"
@@ -65,26 +63,49 @@ update msg model =
       in
         (model, Cmd.none)
     UpdateSearchString newSearchString ->
-      model ! []
+      (model, Cmd.none)
+    OnLocationChange location ->
+      let
+          newRoute =
+              parseLocation location
+      in
+          ( { model | route = newRoute }, Cmd.none )
 
  -- VIEW
+episodeViewPage : EpisodesModel -> EpisodeId -> Html Msg
+episodeViewPage model episodeId =
+  let
+      maybeEpisode =
+          model.episodes
+              |> List.filter (\episode -> episode.id == episodeId)
+              |> List.head
+  in
+      case maybeEpisode of
+          Just episode ->
+              Episodes.View.view episode
 
---episodeToHtml : Episode -> Html
-episodeToHtml episode =
-  li [] [text episode.id]
+          Nothing ->
+              notFoundView
+
+
+
+notFoundView : Html msg
+notFoundView =
+    div []
+        [ text "Not found"
+        ]
 
 view : EpisodesModel -> Html Msg
 view model =
-  div []
-    [ input [ placeholder "enter a movie title"
-            , value "abc"
-            , autofocus True
-            , onInput UpdateSearchString
-            ] []
-   , button [ onClick GetPoster ] [ text "Get poster!" ]
-   , ul []
-      (List.map episodeToHtml model.episodes)
- ]
+    case model.route of
+        Models.EpisodesRoute ->
+            Episodes.List.view model
+
+        Models.EpisodeRoute id ->
+            episodeViewPage model id
+
+        Models.NotFoundRoute ->
+            notFoundView
 
  -- SUBSCRIPTIONS
 

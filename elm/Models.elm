@@ -1,18 +1,27 @@
 module Models exposing (..)
 
+type alias EpisodeId = String
 type alias Episodes = List Episode
 
 type alias Episode =
   { season: String
   , title : String
   , episode: String
-  , id: String
+  , id: EpisodeId
   }
 
 type alias EpisodesModel =
-  {
-  episodes : List Episode
+  { episodes : Episodes
+  , route : Route
   }
 
-initialModel : EpisodesModel
-initialModel = EpisodesModel []
+initialModel : Route -> EpisodesModel
+initialModel route =
+  { episodes = []
+  , route = route
+  }
+
+type Route
+    = EpisodesRoute
+    | EpisodeRoute EpisodeId
+    | NotFoundRoute
