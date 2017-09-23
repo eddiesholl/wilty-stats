@@ -2,7 +2,6 @@ module Episodes.List exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 
 import Models exposing (Episode, EpisodesModel)
 import Msgs exposing (Msg(..))
@@ -23,6 +22,7 @@ episodeToHtml episode =
 view : EpisodesModel -> Html Msg
 view model =
   div []
-    [ ul []
-      (List.map episodeToHtml model.episodes)
- ]
+    [ text model.error
+    , ul [] (List.map episodeToHtml model.episodes)
+    , List.length model.rounds |> toString |> text
+    ]

@@ -1,15 +1,15 @@
 module Episodes.View exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (class, value, href)
 import Msgs exposing (Msg)
-import Models exposing (Episode)
+import Models exposing (Episode, Rounds)
 
 
-view : Episode -> Html Msg
-view model =
+view : Episode -> Rounds -> Html Msg
+view model rounds =
     div []
         [ header model
+        , text (toString (List.length rounds))
         ]
 
 header : Episode -> Html Msg
