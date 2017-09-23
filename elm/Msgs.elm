@@ -3,7 +3,8 @@ module Msgs exposing (..)
 import Http
 import Navigation exposing (Location)
 
-import Models exposing (Episodes, Rounds)
+import Models.Episodes exposing (Episodes)
+import Models.Rounds exposing (Rounds)
 
 -- type alias EpisodesFetchResult = FetchResult
 -- type alias RoundsFetchResult = FetchResult

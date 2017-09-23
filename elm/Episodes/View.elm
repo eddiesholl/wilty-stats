@@ -2,7 +2,8 @@ module Episodes.View exposing (..)
 
 import Html exposing (..)
 import Msgs exposing (Msg)
-import Models exposing (Episode, Rounds)
+import Models.Episodes exposing (Episode)
+import Models.Rounds exposing (Rounds)
 
 
 view : Episode -> Rounds -> Html Msg

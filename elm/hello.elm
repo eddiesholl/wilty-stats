@@ -3,7 +3,8 @@ import Html.Attributes exposing (class, value, href)
 import Http
 import Navigation exposing (Location)
 
-import Models exposing (Episode, EpisodeId, Episodes, EpisodesModel, initialModel, Route)
+import Models.Episodes exposing (Episode, EpisodeId, Episodes)
+import Models.App exposing (EpisodesModel, initialModel, Route(..))
 import Msgs exposing (Msg(..))
 import Routing exposing (parseLocation)
 import Decoders exposing (..)
@@ -110,13 +111,13 @@ notFoundView =
 detailView : EpisodesModel -> Html Msg
 detailView model =
     case model.route of
-        Models.EpisodesRoute ->
+        EpisodesRoute ->
             Episodes.List.view model
 
-        Models.EpisodeRoute id ->
+        EpisodeRoute id ->
             episodeViewPage model id
 
-        Models.NotFoundRoute ->
+        NotFoundRoute ->
             notFoundView
 
 headerView model =

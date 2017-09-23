@@ -3,7 +3,8 @@ module Episodes.List exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
-import Models exposing (Episode, EpisodesModel)
+import Models.Episodes exposing (Episode)
+import Models.App exposing (EpisodesModel)
 import Msgs exposing (Msg(..))
 import Routing exposing (episodePath)
 
