@@ -22,9 +22,11 @@ decodeRounds = Json.list decodeRound
 decodeRound : Json.Decoder Round
 decodeRound = oneOf [decodeStandardRound, decodeThisIsMyRound]
 
+decodeStandardRound : Json.Decoder Round
 decodeStandardRound =
   Json.map toStandardRound decodeStandardRoundFields
 
+toStandardRound : StandardRoundFields -> Round
 toStandardRound f =
     StandardRound f
 

@@ -4,6 +4,7 @@ import Http
 import Navigation exposing (Location)
 
 import Models.Episodes exposing (Episode, EpisodeId, Episodes)
+import Models.Rounds exposing (getEpisodeIdFromRound, getRoundFromRound)
 import Models.App exposing (EpisodesModel, initialModel, Route(..))
 import Msgs exposing (Msg(..))
 import Routing exposing (parseLocation)
@@ -79,6 +80,12 @@ update msg model =
       in
           ( { model | route = newRoute }, Cmd.none )
 
+isRoundForEpisode episodeId round =
+  let
+    e = getEpisodeIdFromRound round
+  in
+    e == episodeId
+
  -- VIEW
 episodeViewPage : EpisodesModel -> EpisodeId -> Html Msg
 episodeViewPage model episodeId =
@@ -93,7 +100,8 @@ episodeViewPage model episodeId =
             let
               maybeRounds =
                   model.rounds
-                      |> List.filter (\round -> True)
+                      |> List.filter (isRoundForEpisode episode.id)
+                      |> List.sortBy (getRoundFromRound)
             in
               Episodes.View.view episode maybeRounds
 

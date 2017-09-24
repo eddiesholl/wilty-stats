@@ -15,6 +15,17 @@ type Round
  = StandardRound StandardRoundFields
  | ThisIsMyRound ThisIsMyRoundFields
 
+getRoundFromRound round =
+  case round of
+    (StandardRound f) -> f.round
+    (ThisIsMyRound f) -> f.round
+    
+getEpisodeIdFromRound : Round -> EpisodeId
+getEpisodeIdFromRound round =
+  case round of
+    (StandardRound f) -> f.episodeId
+    (ThisIsMyRound f) -> f.episodeId
+
 type alias StandardRoundFields =
   { id: RoundId
   , episodeId: EpisodeId
