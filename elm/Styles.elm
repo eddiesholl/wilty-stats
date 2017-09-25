@@ -28,3 +28,7 @@ marginMedium =
 bgBlue =
   [ backgroundColor (rgb 200 200 240)
   ]
+
+bgGreen =
+  [ backgroundColor (rgb 200 240 200)
+  ]

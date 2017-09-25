@@ -131,7 +131,7 @@ detailView model =
 headerView model =
   div []
     [a
-      [ href "/"
+      [ href "/#"
       ]
       [text "Home"]
     ]

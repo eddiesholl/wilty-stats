@@ -57,8 +57,10 @@ standardRoundToHtml s =
 
 thisIsMyRoundToHtml : ThisIsMyRoundFields -> Html Msg
 thisIsMyRoundToHtml s =
-  div []
-    [ text s.guessingTeam
-    , text s.guess
-    , text s.answer
+  div [styles (Styles.flexColumn ++ Styles.greyBorder ++ Styles.padMedium ++ Styles.marginMedium ++ Styles.bgGreen) ]
+    [ textDivLabel "Round" s.round
+    , textDivLabel "Type" "This is my..."
+    , textDivLabel "Team" s.guessingTeam
+    , textDivLabel "Guess" s.guess
+    , textDivLabel "Answer" s.answer
     ]

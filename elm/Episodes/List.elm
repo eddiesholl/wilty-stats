@@ -25,5 +25,4 @@ view model =
   div []
     [ text model.error
     , ul [] (List.map episodeToHtml model.episodes)
-    , List.length model.rounds |> toString |> text
     ]
