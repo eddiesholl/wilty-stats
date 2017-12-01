@@ -80,6 +80,7 @@ update msg model =
       in
           ( { model | route = newRoute }, Cmd.none )
 
+isRoundForEpisode : EpisodeId -> Models.Rounds.Round -> Bool
 isRoundForEpisode episodeId round =
   let
     e = getEpisodeIdFromRound round
@@ -128,6 +129,7 @@ detailView model =
         NotFoundRoute ->
             notFoundView
 
+headerView : a -> Html msg
 headerView model =
   div []
     [a
@@ -136,6 +138,7 @@ headerView model =
       [text "Home"]
     ]
 
+view : EpisodesModel -> Html Msg
 view model =
   div []
     [ headerView model
