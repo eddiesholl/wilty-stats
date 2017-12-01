@@ -2,9 +2,9 @@ module Episodes.List exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 
-import Models exposing (Episode, EpisodesModel)
+import Models.Episodes exposing (Episode)
+import Models.App exposing (EpisodesModel)
 import Msgs exposing (Msg(..))
 import Routing exposing (episodePath)
 
@@ -23,6 +23,6 @@ episodeToHtml episode =
 view : EpisodesModel -> Html Msg
 view model =
   div []
-    [ ul []
-      (List.map episodeToHtml model.episodes)
- ]
+    [ text model.error
+    , ul [] (List.map episodeToHtml model.episodes)
+    ]

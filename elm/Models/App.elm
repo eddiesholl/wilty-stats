@@ -1,24 +1,21 @@
-module Models exposing (..)
+module Models.App exposing (..)
 
-type alias EpisodeId = String
-type alias Episodes = List Episode
-
-type alias Episode =
-  { season: String
-  , title : String
-  , episode: String
-  , id: EpisodeId
-  }
+import Models.Episodes exposing (Episodes, EpisodeId)
+import Models.Rounds exposing (Rounds)
 
 type alias EpisodesModel =
   { episodes : Episodes
+  , rounds : Rounds
   , route : Route
+  , error : String
   }
 
 initialModel : Route -> EpisodesModel
 initialModel route =
   { episodes = []
+  , rounds = []
   , route = route
+  , error = ""
   }
 
 type Route

@@ -1,13 +1,14 @@
 import Html exposing (..)
 import Html.Attributes exposing (class, value, href)
 import Http
-import Json.Decode as Json exposing(string)
-import Json.Decode.Pipeline as JsonPipeline exposing (decode, required)
 import Navigation exposing (Location)
 
-import Models exposing (Episode, EpisodeId, Episodes, EpisodesModel, initialModel, Route)
+import Models.Episodes exposing (Episode, EpisodeId, Episodes)
+import Models.Rounds exposing (getEpisodeIdFromRound, getRoundFromRound)
+import Models.App exposing (EpisodesModel, initialModel, Route(..))
 import Msgs exposing (Msg(..))
 import Routing exposing (parseLocation)
+import Decoders exposing (..)
 import Episodes.List
 import Episodes.View
 
@@ -20,23 +21,26 @@ main =
   , subscriptions = subscriptions
   }
 
+getData : Cmd Msg
+getData =
+  Cmd.batch [
+  getEpisodes
+  , getRounds
+  ]
+
 getEpisodes : Cmd Msg
 getEpisodes =
   let
     url = "//localhost:3000/episodes"
   in
-    Http.send FetchResult (Http.get url decodeEpisodes)
+    Http.send EpisodesFetchResult (Http.get url decodeEpisodes)
 
-decodeEpisodes : Json.Decoder Episodes
-decodeEpisodes = Json.list decodeEpisode
-
-decodeEpisode : Json.Decoder Episode
-decodeEpisode =
-  decode Episode
-    |> JsonPipeline.required "season" string
-    |> JsonPipeline.required "title" string
-    |> JsonPipeline.required "episode" string
-    |> JsonPipeline.required "id" string
+getRounds : Cmd Msg
+getRounds =
+  let
+    url = "//localhost:3000/rounds"
+  in
+    Http.send RoundsFetchResult (Http.get url decodeRounds)
 
 init : Location -> (EpisodesModel, Cmd Msg)
 init location =
@@ -45,7 +49,7 @@ init location =
       Routing.parseLocation location
   in
     ( initialModel currentRoute
-    , getEpisodes
+    , getData
     )
 
  -- UPDATE
@@ -53,14 +57,20 @@ init location =
 update : Msg -> EpisodesModel -> (EpisodesModel, Cmd Msg)
 update msg model =
   case msg of
-    FetchResult (Ok newEpisodes) ->
+    EpisodesFetchResult (Ok newEpisodes) ->
       ({ model | episodes = newEpisodes}, Cmd.none)
-    FetchResult (Err _) ->
+    EpisodesFetchResult (Err e) ->
       let
-        errorMessage = "We couldn’t find that movie 😯"
-        errorImage = "oh-no.jpeg"
+        newError = "Episode fetch failed: " ++ toString e
       in
-        (model, Cmd.none)
+        ({ model | error = newError}, Cmd.none)
+    RoundsFetchResult (Ok newRounds) ->
+      ({ model | rounds = newRounds}, Cmd.none)
+    RoundsFetchResult (Err e) ->
+      let
+        newError = "Rounds fetch failed: " ++ toString e
+      in
+        ({ model | error = newError}, Cmd.none)
     UpdateSearchString newSearchString ->
       (model, Cmd.none)
     OnLocationChange location ->
@@ -69,6 +79,13 @@ update msg model =
               parseLocation location
       in
           ( { model | route = newRoute }, Cmd.none )
+
+isRoundForEpisode : EpisodeId -> Models.Rounds.Round -> Bool
+isRoundForEpisode episodeId round =
+  let
+    e = getEpisodeIdFromRound round
+  in
+    e == episodeId
 
  -- VIEW
 episodeViewPage : EpisodesModel -> EpisodeId -> Html Msg
@@ -81,7 +98,13 @@ episodeViewPage model episodeId =
   in
       case maybeEpisode of
           Just episode ->
-              Episodes.View.view episode
+            let
+              maybeRounds =
+                  model.rounds
+                      |> List.filter (isRoundForEpisode episode.id)
+                      |> List.sortBy (getRoundFromRound)
+            in
+              Episodes.View.view episode maybeRounds
 
           Nothing ->
               notFoundView
@@ -97,23 +120,25 @@ notFoundView =
 detailView : EpisodesModel -> Html Msg
 detailView model =
     case model.route of
-        Models.EpisodesRoute ->
+        EpisodesRoute ->
             Episodes.List.view model
 
-        Models.EpisodeRoute id ->
+        EpisodeRoute id ->
             episodeViewPage model id
 
-        Models.NotFoundRoute ->
+        NotFoundRoute ->
             notFoundView
 
+headerView : a -> Html msg
 headerView model =
   div []
     [a
-      [ href "/"
+      [ href "/#"
       ]
       [text "Home"]
     ]
 
+view : EpisodesModel -> Html Msg
 view model =
   div []
     [ headerView model

@@ -1,7 +1,8 @@
 module Routing exposing (..)
 
 import Navigation exposing (Location)
-import Models exposing (EpisodeId, Route(..))
+import Models.Episodes exposing (EpisodeId)
+import Models.App exposing (Route(..))
 import UrlParser exposing (..)
 
 episodesPath : String
