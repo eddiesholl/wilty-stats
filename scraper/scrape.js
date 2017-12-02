@@ -45,6 +45,60 @@ const hasValue = v => {
     return !R.isNil(v);
 };
 
+
+const sortByName = (a, b) => {
+  var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+  var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+  if (nameA < nameB) {
+    return -1;
+  }
+  if (nameA > nameB) {
+    return 1;
+  }
+
+  // names must be equal
+  return 0;
+}
+
+const addGenderToGuests = ({ episodes, rounds, guests }) => {
+  const wikiLookups = guests
+    .map(guest => {
+      return Boolean(guest.gender)
+        ? Promise.resolve(guest)
+        : new Promise((resolve, reject) => {
+          x(guest.url, 'div#bodyContent')((err, content) => {
+
+            if (err) {
+              resolve(err)
+            }
+
+            const heMatch = content.match(/[ \.]he /gi)
+            const sheMatch = content.match(/[ \.]she /gi)
+            heCount = heMatch && heMatch.length ? heMatch.length : 0
+            sheCount = sheMatch && sheMatch.length ? sheMatch.length : 0
+
+            const gender =
+              (heCount > sheCount)
+                ? 'male'
+                : (heCount < sheCount)
+                  ? 'female'
+                  : ''
+
+            resolve({ ...guest, gender })
+          })
+        })
+      })
+
+    return Promise.all(wikiLookups)
+      .then(lookups => {
+        return {
+          episodes,
+          rounds,
+          guests: lookups.sort(sortByName)
+        }
+      })
+}
+
 const cleanScrapedEpisodes = (rawEpisodes) => {
     return rawEpisodes.filter(s => {
             return !!s.title;
@@ -95,12 +149,16 @@ Promise.all([scrapePromise, readPromise]).then(results => {
         const episodes = merge.mergeEpisodes(scrapedEpisodes, existing.episodes, guests);
         const rounds = existing.rounds || [];
 
+        return {
+          episodes,
+          rounds,
+          guests
+        }
+      })
+      .then(addGenderToGuests)
+      .then(results => {
         //  console.log('writing result ' + JSON.stringify(merged))
-        fs.writeFile('episodes.json', JSON.stringify({
-            episodes,
-            rounds,
-            guests
-        }, 0, 2));
+        fs.writeFile('episodes.json', JSON.stringify(results, 0, 2));
     })
     .catch(e => {
         console.error(e)
