@@ -57,7 +57,7 @@ const guestsToGuestIds = (ep) => {
     const result = Object.assign({}, ep);
     result.davidsGuest1 = guestId(ep.davidsGuest1);
     result.davidsGuest2 = guestId(ep.davidsGuest2);
-    result.davidsGuest1 = guestId(ep.leesGuest1);
+    result.leesGuest1 = guestId(ep.leesGuest1);
     result.leesGuest2 = guestId(ep.leesGuest2);
 
     return result;
